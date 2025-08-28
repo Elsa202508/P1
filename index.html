@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化妆品管理工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-palette"></i> 化妆品管理工具</h1>
+            <p class="subtitle">轻松管理您的化妆品，再也不用担心过期问题</p>
+        </header>
+
+        <main class="main-content">
+            <!-- 添加化妆品表单 -->
+            <section class="add-section">
+                <h2><i class="fas fa-plus-circle"></i> 添加化妆品</h2>
+                <form id="cosmeticForm" class="form">
+                    <div class="form-group">
+                        <label for="name">化妆品名称</label>
+                        <input type="text" id="name" name="name" required placeholder="请输入化妆品名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="purchaseDate">购买时间</label>
+                        <input type="date" id="purchaseDate" name="purchaseDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="shelfLife">保质期（月）</label>
+                        <input type="number" id="shelfLife" name="shelfLife" required min="1" max="120" placeholder="请输入保质期月数">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">分类</label>
+                        <select id="category" name="category">
+                            <option value="护肤">护肤</option>
+                            <option value="彩妆">彩妆</option>
+                            <option value="香水">香水</option>
+                            <option value="洗护">洗护</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 添加化妆品
+                    </button>
+                </form>
+            </section>
+
+            <!-- 化妆品列表 -->
+            <section class="list-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> 我的化妆品</h2>
+                    <div class="filter-controls">
+                        <select id="filterCategory" class="filter-select">
+                            <option value="all">全部分类</option>
+                            <option value="护肤">护肤</option>
+                            <option value="彩妆">彩妆</option>
+                            <option value="香水">香水</option>
+                            <option value="洗护">洗护</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="all">全部状态</option>
+                            <option value="fresh">新鲜</option>
+                            <option value="warning">即将过期</option>
+                            <option value="expired">已过期</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="cosmeticList" class="cosmetic-grid">
+                    <!-- 化妆品卡片将在这里动态生成 -->
+                </div>
+                
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-box-open"></i>
+                    <p>还没有添加任何化妆品</p>
+                    <p class="empty-subtitle">点击上方添加按钮开始管理您的化妆品吧！</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- 统计信息 -->
+        <aside class="stats-panel">
+            <h3><i class="fas fa-chart-pie"></i> 统计信息</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">总数量</div>
+                </div>
+                <div class="stat-item warning">
+                    <div class="stat-number" id="warningCount">0</div>
+                    <div class="stat-label">即将过期</div>
+                </div>
+                <div class="stat-item danger">
+                    <div class="stat-number" id="expiredCount">0</div>
+                    <div class="stat-label">已过期</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> 编辑化妆品</h3>
+                <button class="close-btn" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editForm" class="form">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editName">化妆品名称</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPurchaseDate">购买时间</label>
+                    <input type="date" id="editPurchaseDate" name="purchaseDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editShelfLife">保质期（月）</label>
+                    <input type="number" id="editShelfLife" name="shelfLife" required min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">分类</label>
+                    <select id="editCategory" name="category">
+                        <option value="护肤">护肤</option>
+                        <option value="彩妆">彩妆</option>
+                        <option value="香水">香水</option>
+                        <option value="洗护">洗护</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

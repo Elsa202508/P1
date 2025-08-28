@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的日記本 - 記錄生活點滴</title>
+    <link rel="stylesheet" href="diary-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    <h1>我的日記本</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="showExportModal()">
+                        <i class="fas fa-download"></i>
+                        <span class="btn-text">導出自傳</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddEntryModal()">
+                        <i class="fas fa-plus"></i>
+                        <span class="btn-text">新增記錄</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要內容區域 -->
+        <main class="main-content">
+            <!-- 今日概覽 -->
+            <section class="today-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-calendar-day"></i>
+                        今日記錄
+                        <span class="date" id="todayDate"></span>
+                    </h2>
+                    <div class="today-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-edit"></i>
+                            <span id="todayEntryCount">0</span> 條記錄
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- 今日條目列表 -->
+                <div class="today-entries" id="todayEntries">
+                    <div class="empty-state" id="todayEmptyState">
+                        <i class="fas fa-feather-alt"></i>
+                        <p>今天還沒有記錄任何事情</p>
+                        <p class="empty-subtitle">點擊上方「新增記錄」開始記錄您的一天</p>
+                    </div>
+                </div>
+                
+                <!-- AI生成日記按鈕 -->
+                <div class="ai-generate-section" id="aiGenerateSection" style="display: none;">
+                    <button class="btn btn-ai" onclick="generateDiary()">
+                        <i class="fas fa-magic"></i>
+                        AI 生成今日日記
+                    </button>
+                    <p class="ai-hint">基於今日的記錄，AI 將為您生成一篇完整的日記</p>
+                </div>
+            </section>
+
+            <!-- 歷史日記 -->
+            <section class="history-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-history"></i>
+                        歷史日記
+                    </h2>
+                    <div class="filter-controls">
+                        <select id="monthFilter" class="filter-select">
+                            <option value="all">所有月份</option>
+                        </select>
+                        <select id="yearFilter" class="filter-select">
+                            <option value="all">所有年份</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="diary-timeline" id="diaryTimeline">
+                    <div class="empty-state" id="historyEmptyState">
+                        <i class="fas fa-book"></i>
+                        <p>還沒有歷史日記</p>
+                        <p class="empty-subtitle">開始記錄生活，積累您的人生故事</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 統計面板 -->
+        <aside class="stats-sidebar">
+            <div class="stats-card">
+                <h3><i class="fas fa-chart-line"></i> 記錄統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                         <div class="stat-number" data-stat="today">0</div>
+                         <div class="stat-label">今日記錄</div>
+                     </div>
+                     <div class="stat-item">
+                         <div class="stat-number" data-stat="entries">0</div>
+                         <div class="stat-label">總記錄數</div>
+                     </div>
+                     <div class="stat-item">
+                         <div class="stat-number" data-stat="diaries">0</div>
+                         <div class="stat-label">完整日記</div>
+                     </div>
+                     <div class="stat-item">
+                         <div class="stat-number" data-stat="streak">0</div>
+                         <div class="stat-label">連續天數</div>
+                     </div>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <h3><i class="fas fa-calendar-alt"></i> 本月活動</h3>
+                <div class="calendar-heatmap" id="calendarHeatmap">
+                    <!-- 日曆熱力圖將在這裡生成 -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 新增記錄模態框 -->
+    <div id="addEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> 新增記錄</h3>
+                <button class="close-btn" onclick="closeAddEntryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="entryForm">
+                    <div class="form-group">
+                        <label for="entryTime">時間</label>
+                        <input type="time" id="entryTime" name="time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryContent">記錄內容</label>
+                        <textarea id="entryContent" name="content" placeholder="簡單描述您現在在做什麼..." required rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryMood">心情</label>
+                        <div class="mood-selector">
+                            <button type="button" class="mood-btn" data-mood="😊" title="開心">😊</button>
+                            <button type="button" class="mood-btn" data-mood="😐" title="平靜">😐</button>
+                            <button type="button" class="mood-btn" data-mood="😔" title="難過">😔</button>
+                            <button type="button" class="mood-btn" data-mood="😴" title="疲憊">😴</button>
+                            <button type="button" class="mood-btn" data-mood="😤" title="生氣">😤</button>
+                            <button type="button" class="mood-btn" data-mood="🤔" title="思考">🤔</button>
+                        </div>
+                        <input type="hidden" id="selectedMood" name="mood" value="😊">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddEntryModal()">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存記錄
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看日記模態框 -->
+    <div id="viewDiaryModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="diaryModalTitle"><i class="fas fa-book-open"></i> 日記詳情</h3>
+                <div class="modal-header-actions">
+                    <button class="btn btn-outline btn-small" onclick="editDiary()">
+                        <i class="fas fa-edit"></i> 編輯
+                    </button>
+                    <button class="close-btn" onclick="closeViewDiaryModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="diary-content">
+                    <div class="diary-entries" id="diaryEntries">
+                        <!-- 當日記錄條目 -->
+                    </div>
+                    <div class="diary-text" id="diaryText">
+                        <!-- AI生成的日記內容 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 導出自傳模態框 -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-download"></i> 導出個人自傳</h3>
+                <button class="close-btn" onclick="closeExportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="form-group">
+                        <label for="exportTitle">自傳標題</label>
+                        <input type="text" id="exportTitle" placeholder="我的人生故事" value="我的人生故事">
+                    </div>
+                    <div class="form-group">
+                        <label for="exportDateRange">時間範圍</label>
+                        <select id="exportDateRange">
+                            <option value="all">全部時間</option>
+                            <option value="thisYear">今年</option>
+                            <option value="lastYear">去年</option>
+                            <option value="custom">自定義範圍</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customDateRange" style="display: none;">
+                        <div class="date-range">
+                            <input type="date" id="startDate" placeholder="開始日期">
+                            <span>至</span>
+                            <input type="date" id="endDate" placeholder="結束日期">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exportFormat">導出格式</label>
+                        <select id="exportFormat">
+                            <option value="html">HTML 網頁</option>
+                            <option value="txt">純文字</option>
+                            <option value="markdown">Markdown</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeExportModal()">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="exportAutobiography()">
+                        <i class="fas fa-download"></i> 開始導出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入指示器 -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <p>AI 正在生成您的日記...</p>
+    </div>
+
+    <script src="diary-script.js"></script>
+</body>
+</html>
